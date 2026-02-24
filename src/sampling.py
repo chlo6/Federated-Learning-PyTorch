@@ -35,7 +35,7 @@ def mnist_noniid(dataset, num_users):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = dataset.train_labels.numpy()
+    labels = dataset.targets.numpy()
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
@@ -170,7 +170,7 @@ def cifar_noniid(dataset, num_users):
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
     # labels = dataset.train_labels.numpy()
-    labels = np.array(dataset.train_labels)
+    labels = np.array(dataset.targets)
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
