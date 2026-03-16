@@ -33,7 +33,7 @@ if __name__ == '__main__':
             global_model = CNNFashion_Mnist(args=args)
         elif args.dataset == 'cifar':
             global_model = CNNCifar(args=args)
-    elif args.model = 'mobilenet':
+    elif args.model == 'mobilenet':
         if args.dataset == 'cifar':
             global_model = MobileNetCifar(args=args)
         else:    
