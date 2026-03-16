@@ -5,6 +5,7 @@
 from torch import nn
 import torch.nn.functional as F
 
+from torchvision.models import mobilenet_v2
 
 class MLP(nn.Module):
     def __init__(self, dim_in, dim_hidden, dim_out):
@@ -118,3 +119,16 @@ class modelC(nn.Module):
         pool_out.squeeze_(-1)
         pool_out.squeeze_(-1)
         return pool_out
+
+class MobileNetCifar(nn.Module):
+    def __init__(self, args):
+        super(MobileNetCifar, self).__init__()
+
+        self.model = mobilenet_v2(weights=None)
+
+        in_features = self.model.classifier[1].in_features
+        self.model.classifier[1] = nn.Linear(in_features, args.num_classes)
+
+    def forward(self, x):
+        x = self.model(x)
+        return F.log_softmax(x, dim=1)
