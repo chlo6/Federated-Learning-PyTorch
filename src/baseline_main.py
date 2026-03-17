@@ -14,6 +14,8 @@ from options import args_parser
 from update import test_inference
 from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, MobileNetCifar
 
+import os
+os.makedirs('../save', exist_ok=True)
 
 if __name__ == '__main__':
     args = args_parser()
@@ -87,6 +89,8 @@ if __name__ == '__main__':
         loss_avg = sum(batch_loss)/len(batch_loss)
         print('\nTrain loss:', loss_avg)
         epoch_loss.append(loss_avg)
+
+    torch.save(model.state_dict(), '../save/model_weights.pth')
 
     # Plot loss
     plt.figure()
