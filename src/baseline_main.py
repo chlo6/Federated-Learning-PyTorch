@@ -90,7 +90,7 @@ if __name__ == '__main__':
         print('\nTrain loss:', loss_avg)
         epoch_loss.append(loss_avg)
 
-    torch.save(model.state_dict(), '../save/model_weights.pth')
+    torch.save(global_model.state_dict(), '../save/model_weights.pth')
 
     # Plot loss
     plt.figure()
