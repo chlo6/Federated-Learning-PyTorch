@@ -54,12 +54,11 @@ if __name__ == '__main__':
                                dim_out=args.num_classes)
 
     elif args.model == 'mobilenet':
-    if args.dataset == 'cifar':
-        global_model = MobileNetCifar(args=args)
-    else:
-        exit('Error: mobilenet only supported for cifar')
+        if args.dataset == 'cifar':
+            global_model = MobileNetCifar(args=args)
+        else:
+            exit('Error: mobilenet only supported for cifar')
 
-    
     else:
         exit('Error: unrecognized model')
 
