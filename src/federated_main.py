@@ -141,7 +141,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     matplotlib.use('Agg')
 
-    Plot Loss curve
+    # Plot Loss curve
     plt.figure()
     plt.title('Training Loss vs Communication rounds')
     plt.plot(range(len(train_loss)), train_loss, color='r')
