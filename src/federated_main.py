@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     elif args.model == 'mobilenet':
         if args.dataset == 'cifar':
-            global_model = MobileNetCifar(args=args)
+            global_model = MobileNet(args=args)
         else:
             exit('Error: mobilenet only supported for cifar')
 
