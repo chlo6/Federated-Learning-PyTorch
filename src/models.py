@@ -6,6 +6,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from torchvision.models import mobilenet_v2
+import torch
 
 class MLP(nn.Module):
     def __init__(self, dim_in, dim_hidden, dim_out):
@@ -88,7 +89,7 @@ class CNNCifar(nn.Module):
 
 class modelC(nn.Module):
     def __init__(self, input_size, n_classes=10, **kwargs):
-        super(AllConvNet, self).__init__()
+        super(modelC, self).__init__()
         self.conv1 = nn.Conv2d(input_size, 96, 3, padding=1)
         self.conv2 = nn.Conv2d(96, 96, 3, padding=1)
         self.conv3 = nn.Conv2d(96, 96, 3, padding=1, stride=2)
@@ -135,7 +136,7 @@ class MobileNet(nn.Module):
         super(MobileNet, self).__init__()
 
         # Load torchvision's MobileNetV2 (no pretrained weights for FL from scratch)
-        backbone = models.mobilenet_v2(weights=None)
+        backbone = mobilenet_v2(weights=None)
 
         # change stride to 1 to preserve spatial info
         backbone.features[0][0] = nn.Conv2d(
