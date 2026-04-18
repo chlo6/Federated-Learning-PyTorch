@@ -119,16 +119,43 @@ class modelC(nn.Module):
         pool_out.squeeze_(-1)
         pool_out.squeeze_(-1)
         return pool_out
+class MobileNet(nn.Module):
+    """
+    MobileNetV2 adapted for CIFAR-10 (32×32 images).
 
-class MobileNetCifar(nn.Module):
-    def __init__(self, args):
-        super(MobileNetCifar, self).__init__()
+    Standard MobileNetV2 is designed for 224×224 images. If you use it as-is
+    on CIFAR-10's 32×32 inputs, the spatial dimensions collapse to 1×1 after
+    just a couple of strided layers, breaking the network.
 
-        self.model = mobilenet_v2(weights=None)
+    Fix: modify the first conv layer to use stride=1 instead of stride=2,
+    which is standard practice for CIFAR-10 MobileNet.
+    """
 
-        in_features = self.model.classifier[1].in_features
-        self.model.classifier[1] = nn.Linear(in_features, args.num_classes)
+    def __init__(self, num_classes=10):
+        super(MobileNet, self).__init__()
+
+        # Load torchvision's MobileNetV2 (no pretrained weights for FL from scratch)
+        backbone = models.mobilenet_v2(weights=None)
+
+        # change stride to 1 to preserve spatial info
+        backbone.features[0][0] = nn.Conv2d(
+            3, 32, kernel_size=3, stride=1, padding=1, bias=False
+        )
+
+        # Keep all the inverted residual blocks
+        self.features = backbone.features
+
+        # Replace classifier for CIFAR-10 (10 classes)
+        # MobileNetV2's last channel is 1280
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(1280, num_classes),
+        )
 
     def forward(self, x):
-        x = self.model(x)
-        return F.log_softmax(x, dim=1)
+        x = self.features(x)
+        # Adaptive average pooling: handles any spatial size
+        x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
