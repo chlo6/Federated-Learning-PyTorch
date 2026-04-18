@@ -18,6 +18,14 @@ from update import LocalUpdate, test_inference
 from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, MobileNetCifar
 from utils import get_dataset, average_weights, exp_details
 
+def model_has_bn(model):
+    """Check whether a model contains BatchNorm layers."""
+    for module in model.modules():
+        if isinstance(module, (torch.nn.BatchNorm1d, torch.nn.BatchNorm2d,
+                               torch.nn.BatchNorm3d)):
+            return True
+    return False
+
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -67,6 +75,15 @@ if __name__ == '__main__':
     global_model.train()
     print(global_model)
 
+    # use FedBN aggregation if model has BatchNorm layers
+    use_fedbn = model_has_bn(global_model)
+    if use_fedbn:
+        print(f"\n[INFO] Model '{args.model}' has BatchNorm layers.")
+        print("[INFO] Using FedBN aggregation (BN running stats excluded from averaging).")
+        print("[INFO] This fixes the 10% accuracy bug with MobileNet + non-IID CIFAR.\n")
+    else:
+        print(f"\n[INFO] Model '{args.model}' has no BatchNorm. Using standard FedAvg.\n")
+        
     # copy weights
     global_weights = global_model.state_dict()
 
@@ -93,8 +110,14 @@ if __name__ == '__main__':
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
 
-        # update global weights
-        global_weights = average_weights(local_weights)
+        if use_fedbn:
+            # FedBN: exclude BN running stats from averaging.
+            # BN running_mean/var stay as they were in the global model
+            # (from the previous round), only trainable params are averaged.
+            global_weights = average_weights_fedbn(local_weights)
+        else:
+            # Standard FedAvg for models without BN
+            global_weights = average_weights(local_weights)
 
         # update global weights
         global_model.load_state_dict(global_weights)
