@@ -15,7 +15,7 @@ from tensorboardX import SummaryWriter
 
 from options import args_parser
 from update import LocalUpdate, test_inference
-from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, MobileNetCifar
+from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, MobileNet
 from utils import get_dataset, average_weights, exp_details
 
 def model_has_bn(model):
