@@ -154,6 +154,8 @@ if __name__ == '__main__':
         format(args.dataset, args.model, args.epochs, args.frac, args.iid,
                args.local_ep, args.local_bs)
 
+    os.makedirs(os.path.join(path_project, 'save', 'objects'), exist_ok=True)
+
     with open(file_name, 'wb') as f:
         pickle.dump([train_loss, train_accuracy], f)
 
