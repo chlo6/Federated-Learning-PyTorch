@@ -159,3 +159,5 @@ class MobileNet(nn.Module):
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
+
+MobileNetCifar = MobileNet
