@@ -84,6 +84,74 @@ def average_weights(w):
     return w_avg
 
 
+def average_weights_fedbn(w):
+    """
+    FedBN-style aggregation: averages ONLY the trainable weights (conv, linear,
+    BN gamma/beta), but EXCLUDES BN running statistics from aggregation.
+
+    BN layers have 4 keys per layer:
+      - weight (gamma)    ← trainable, DO average
+      - bias (beta)       ← trainable, DO average
+      - running_mean      ← running stat, DO NOT average
+      - running_var       ← running stat, DO NOT average
+      - num_batches_tracked ← counter, DO NOT average
+
+    By keeping BN running stats LOCAL (not averaged), each client maintains
+    its own distribution statistics. The global model only shares the
+    learned feature transformation weights.
+
+    This is what your professor meant by:
+    "handle weight and normalization layer separately"
+    "decouple into branch then avg branch by branch"
+    """
+    w_avg = copy.deepcopy(w[0])
+
+    # Keys to skip during aggregation (BN running statistics)
+    bn_stat_keys = ['running_mean', 'running_var', 'num_batches_tracked']
+
+    for key in w_avg.keys():
+        # Skip BN running statistics — keep them local (from client 0 / global model)
+        if any(bn_key in key for bn_key in bn_stat_keys):
+            continue
+
+        # Average all other parameters (conv weights, linear weights, BN gamma/beta)
+        for i in range(1, len(w)):
+            w_avg[key] += w[i][key]
+        w_avg[key] = torch.div(w_avg[key], len(w))
+
+    return w_avg
+
+
+def average_weights_fedbn_weighted(w, data_sizes):
+    """
+    Weighted FedBN: weights each client's contribution by dataset size.
+    More correct than simple averaging when clients have unequal data.
+    Still skips BN running stats.
+
+    Args:
+        w: list of state_dicts from each client
+        data_sizes: list of ints, number of training samples per client
+    """
+    total = sum(data_sizes)
+    weights = [s / total for s in data_sizes]
+
+    w_avg = copy.deepcopy(w[0])
+    bn_stat_keys = ['running_mean', 'running_var', 'num_batches_tracked']
+
+    # Initialize with first client weighted
+    for key in w_avg.keys():
+        if any(bn_key in key for bn_key in bn_stat_keys):
+            continue
+        w_avg[key] = w_avg[key] * weights[0]
+
+    for key in w_avg.keys():
+        if any(bn_key in key for bn_key in bn_stat_keys):
+            continue
+        for i in range(1, len(w)):
+            w_avg[key] += w[i][key] * weights[i]
+
+    return w_avg
+
 def exp_details(args):
     print('\nExperimental details:')
     print(f'    Model     : {args.model}')
