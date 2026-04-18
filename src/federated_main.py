@@ -16,7 +16,7 @@ from tensorboardX import SummaryWriter
 from options import args_parser
 from update import LocalUpdate, test_inference
 from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, MobileNet
-from utils import get_dataset, average_weights, exp_details
+from utils import get_dataset, average_weights, average_weights_fedbn, exp_details
 
 def model_has_bn(model):
     """Check whether a model contains BatchNorm layers."""
