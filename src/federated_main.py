@@ -58,8 +58,8 @@ if __name__ == '__main__':
         len_in = 1
         for x in img_size:
             len_in *= x
-            global_model = MLP(dim_in=len_in, dim_hidden=64,
-                               dim_out=args.num_classes)
+        global_model = MLP(dim_in=len_in, dim_hidden=64,
+                            dim_out=args.num_classes)
 
     elif args.model == 'mobilenet':
         if args.dataset == 'cifar':

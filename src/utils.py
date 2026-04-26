@@ -40,21 +40,26 @@ def get_dataset(args):
                 # Chose euqal splits for every user
                 user_groups = cifar_noniid(train_dataset, args.num_users)
 
-    elif args.dataset == 'mnist' or 'fmnist':
+    elif args.dataset == 'mnist' or args.dataset == 'fmnist':
         if args.dataset == 'mnist':
             data_dir = '../data/mnist/'
-        else:
+            apply_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.1307,), (0.3081,))])
+            train_dataset = datasets.MNIST(data_dir, train=True, download=True,
+                                        transform=apply_transform)
+            test_dataset = datasets.MNIST(data_dir, train=False, download=True,
+                                        transform=apply_transform)
+        else:  # fmnist
             data_dir = '../data/fmnist/'
+            apply_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.2860,), (0.3530,))])  # FashionMNIST stats
+            train_dataset = datasets.FashionMNIST(data_dir, train=True, download=True,
+                                                transform=apply_transform)
+            test_dataset = datasets.FashionMNIST(data_dir, train=False, download=True,
+                                                transform=apply_transform)
 
-        apply_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))])
-
-        train_dataset = datasets.MNIST(data_dir, train=True, download=True,
-                                       transform=apply_transform)
-
-        test_dataset = datasets.MNIST(data_dir, train=False, download=True,
-                                      transform=apply_transform)
 
         # sample training data amongst users
         if args.iid:
